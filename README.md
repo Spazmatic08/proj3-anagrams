@@ -6,6 +6,7 @@ Vocabularly anagrams game for primary school English language learners (ELL)
 
 A simple anagram game designed for English-language learning students in 
 elementary and middle school.  
+
 Students are presented with a list of vocabulary words (taken from a text file) 
 and an anagram.  The anagram is a jumble of some number of vocabulary words, randomly chosen.  Students attempt to type vocabularly words that can be created from the  
 jumble.  When a matching word is typed, it is added to a list of solved words. 
@@ -16,27 +17,17 @@ have different anagrams.
 
 ## Authors 
 
-Initial version by M Young; to be revised by CIS 322 students. 
+Initial version by M Young.
+Revised version by A Dibb. 
 
 ## Status
 
-flask_vocab.py and the template vocab.html are a 'skeleton' version 
-of the anagram game for a CIS 322 project.  They uses conventional  
-interaction through a form, interacting only when the user submits the form. 
-Your assignment is to replace the interaction with AJAX interaction on each 
-keystroke. 
-
-## Minijax? 
-
-flask_minijax.py and templates/minijax.html are a tiny example of using JQuery 
-with flask for an Ajax application.  They should not be included in the
-version of the project you turn in. 
+flask_vocab.py and the template vocab.html are a complete version 
+of the anagram game for a CIS 322 project.  They use AJAX interaction 
+on each keystroke. 
 
 
 ## To run automated tests 
-* `nosetests`
+* `nosetests` (Note: make certain you are using Python 3)
 
 There are currently nose tests for vocab.py, letterbag.py, and jumble.py. 
-
-
-
