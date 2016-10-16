@@ -36,7 +36,7 @@ def test_small_words():
     assert vocab.has("b")
 
 def test_huge_words():
-    vocab = Vocab(["neumonoultramicroscopicsilicovolcanoconiosis"])
+    vocab = Vocab(["pneumonoultramicroscopicsilicovolcanoconiosis"])
     assert vocab.has("pneumonoultramicroscopicsilicovolcanoconiosis")
 
 def test_from_simulated_file():
