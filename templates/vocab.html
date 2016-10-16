@@ -80,11 +80,10 @@
 <br />
 <div class="row">
   <div class="col-xs-6 text-center">
-  <form id="entry" method="POST" action="/_check">
+  <form id="entry">
     <label for="attempt">Word:</label>
     <input id="attempt" name="attempt" type="text" width="15"
       autocomplete="off"  autofocus />
-    <input type="submit" name="try" />
   </form>
 </div></div>
 
@@ -99,17 +98,51 @@
 </p>
 {% endif %}
 
+<p id="message"></p>
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <!-- Mismatch, already found, etc. "flashed" from Python -->
-    {% for message in messages %}
-      <p class="message">{{ message }}</p>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+<script>
 
+$("#attempt").keyup(function(event) {
+  // Grab the info we need from the input field and the event
+  var txt = $("#attempt").val();
+  keycode = event.which;
+  letter = String.fromCharCode(keycode);
+  
+  // Check if the letter was in the jumble, and erase it 
+  // if not
+  if (! "{{ session.jumble }}".toUpperCase().includes(letter)
+      && keycode != 8) {   // exclude backspace
+     
+    $("#attempt").val(txt.substring(0, txt.length - 1));
+    $("#message").html("That letter is not in the jumble!");
+    return
 
+  } else { // The 'else' here prevents people from completing a word
+	   // using a banned character
+    
+    // Pass the input to the server and get the response.
+    $.getJSON( "/_check", { text: txt }, 
+
+	    function(data) {
+	      // If the input is an already found word, say so
+	      if (data.result.oldmatch){
+		$("#message").html("That word was already found.");
+	      // Otherwise, if it's still valid, then it's a new word
+	      // and we need to reload the page to display it
+	      } else if (data.result.valid) {
+	        window.location.replace(data.result.url);
+	      // If it's neither, just clear the message field.
+	      } else {
+		$("#message").html("");
+	      }
+	    }
+
+    );
+  
+  }
+});
+
+</script>
 
  </div> <!-- container -->
 </body> </html>

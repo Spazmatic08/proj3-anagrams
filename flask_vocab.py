@@ -65,53 +65,58 @@ def success():
   return flask.render_template('success.html')
 
 #######################
-# Form handler.  
-# CIS 322 (399se) note:
-#   You'll need to change this to a
-#   a JSON request handler
+# JSON request handler
 #######################
 
-@app.route("/_check", methods = ["POST"])
+@app.route("/_check")
 def check():
-  """
-  User has submitted the form with a word ('attempt')
-  that should be formed from the jumble and on the
-  vocabulary list.  We respond depending on whether
-  the word is on the vocab list (therefore correctly spelled),
-  made only from the jumble letters, and not a word they
-  already found.
-  """
-  app.logger.debug("Entering check")
+  # Get the passed text from the client
+  text = request.args.get("text", type=str)
 
-  ## The data we need, from form and from cookie
-  text = request.form["attempt"]
-  jumble = flask.session["jumble"]
-  matches = flask.session.get("matches", []) # Default to empty list
+  # Interpret the results
+  rslt = gen_result(text)
 
-  ## Is it good? 
-  in_jumble = LetterBag(jumble).contains(text)
-  matched = WORDS.has(text)
-
-  ## Respond appropriately 
-  if matched and in_jumble and not (text in matches):
-    ## Cool, they found a new word
+  # If it's a new word, we need to add it to
+  # the matches so it can be displayed and
+  # prevent it from being chosen again
+  if rslt["valid"] and not rslt["oldmatch"]:
+    matches = flask.session.get("matches")
     matches.append(text)
     flask.session["matches"] = matches
-  elif text in matches:
-    flask.flash("You already found {}".format(text))
-  elif not matched:
-    flask.flash("{} isn't in the list of words".format(text))
-  elif not in_jumble:
-    flask.flash('"{}" can\'t be made from the letters {}'.format(text,jumble))
-  else:
-    app.logger.debug("This case shouldn't happen!")
-    assert False  # Raises AssertionError
 
-  ## Choose page:  Solved enough, or keep going? 
-  if len(matches) >= flask.session["target_count"]:
-    return flask.redirect(url_for("success"))
+  # Find the url to redirect to
+  if rslt["complete"]:
+    redirect = url_for("success")
   else:
-    return flask.redirect(url_for("keep_going"))
+    redirect = url_for("keep_going")
+
+  # Attach the url
+  rslt["url"] = redirect
+
+  # Return the requested JSON
+  return jsonify(result=rslt)
+
+
+def gen_result(text):
+  valid = WORDS.has(text)
+
+  matches = flask.session.get("matches", [])
+  oldmatch = text in matches
+
+  complete = len(matches) >= flask.session["target_count"]
+
+  # We don't need to scan for non-jumble letters,
+  # the JS does that already. We just need to check
+  # if it's a match not yet found, and if we have
+  # the target number of matches yet.
+
+  rslt = { "valid": valid,
+           "oldmatch": oldmatch,
+           "complete": complete }
+
+  return rslt
+
+
 
 ###############
 # AJAX request handlers 
