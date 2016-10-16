@@ -28,6 +28,17 @@ def test_small_vocab():
     assert not vocab.has("many")
     assert sorted(vocab.as_list()) == sorted(l)
 
+def test_small_words():
+    vocab = Vocab(["", "a", "b", "ab", "ba"])
+    assert vocab.has("a")
+    assert vocab.has("")
+    assert vocab.has("ba")
+    assert vocab.has("b")
+
+def test_huge_words():
+    vocab = Vocab(["neumonoultramicroscopicsilicovolcanoconiosis"])
+    assert vocab.has("pneumonoultramicroscopicsilicovolcanoconiosis")
+
 def test_from_simulated_file():
     from io import StringIO
     l = StringIO(initial_value="""
